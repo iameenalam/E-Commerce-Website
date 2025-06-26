@@ -16,21 +16,28 @@ export async function Navbar() {
   const user = await getUser();
 
   const cart: Cart | null = await redis.get(`cart-${user?.id}`);
-
   const total = cart?.items.reduce((sum, item) => sum + item.quantity, 0) || 0;
 
   return (
-    <nav className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex items-center justify-between">
-      <div className="flex items-center">
+    <nav className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex items-center justify-between">
+      {/* Left - Logo */}
+      <div className="flex items-center z-10">
         <Link href="/">
-          <h1 className="text-black font-bold text-xl lg:text-3xl">
-            Shoe<span className="text-primary">Store</span>
-          </h1>
+          <img
+            src="/logo.png"
+            alt="Solezaar Logo"
+            className="h-10 w-auto lg:h-14"
+          />
         </Link>
+      </div>
+
+      {/* Center - Navbar Links */}
+      <div className="absolute left-1/2 transform -translate-x-1/2">
         <NavbarLinks />
       </div>
 
-      <div className="flex items-center">
+      {/* Right - Cart and User/Auth */}
+      <div className="flex items-center z-10">
         {user ? (
           <>
             <Link href="/bag" className="group p-2 flex items-center mr-2">
@@ -49,21 +56,14 @@ export async function Navbar() {
             />
           </>
         ) : (
-          <div className="flex items-center md:flex-1 md:justify-end md:space-x-2">
-            <div className="md:hidden">
-              <Button variant="ghost" asChild>
-                <LoginLink>Sign in</LoginLink>
-              </Button>
-            </div>
-            <div className="hidden md:flex md:flex-1 md:items-center md:justify-end md:space-x-2">
-              <Button variant="ghost" asChild>
-                <LoginLink>Sign in</LoginLink>
-              </Button>
-              <span className="h-6 w-px bg-gray-200"></span>
-              <Button variant="ghost" asChild>
-                <RegisterLink>Create Account</RegisterLink>
-              </Button>
-            </div>
+          <div className="flex items-center md:space-x-2">
+            <Button variant="ghost" asChild>
+              <LoginLink>Sign in</LoginLink>
+            </Button>
+            <span className="hidden md:block h-6 w-px bg-gray-200"></span>
+            <Button variant="ghost" asChild className="hidden md:inline-flex">
+              <RegisterLink>Create Account</RegisterLink>
+            </Button>
           </div>
         )}
       </div>
