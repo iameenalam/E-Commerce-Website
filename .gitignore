@@ -13,8 +13,6 @@
 /.next/
 /out/
 
-.env.local
-
 # production
 /build
 
