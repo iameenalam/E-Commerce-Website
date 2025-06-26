@@ -8,9 +8,9 @@ import { ourFileRouter } from "./api/uploadthing/core";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "ShoeStore - The Best Shoes Online",
+  title: "Solezaar - The Best Shoes Online",
   description:
-    "Discover premium quality shoes at ShoeStore. Shop the latest trends now!",
+    "Discover premium quality shoes at Solezaar. Shop the latest trends now!",
 };
 
 export default function RootLayout({
@@ -20,9 +20,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <link rel="icon" href="/favicon.png" />
-      </head>
       <body className={inter.className}>
         <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
         {children}
