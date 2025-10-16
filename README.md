@@ -19,12 +19,4 @@
 - **Payment Gateway:** Stripe
 - **File Uploads:** UploadThing
 
-## Demo
-
-You can view the live demo of the website [here](https://e-shoestoree.vercel.app/)
-
-## Contributions
-
-Feel free to fork the repository and submit pull requests. Any contributions to improving the project are welcome!
-
 ---
