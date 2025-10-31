@@ -1,4 +1,4 @@
-# E-Commerce Store - Solezaar
+# E-Commerce Website - Solezaar
 
 **Solezaar** is an easy-to-use online store where you can browse and buy different types of shoes. It’s designed to give users a smooth and simple shopping experience. The store comes with all the essential features you need for online shopping, like product listings, a shopping cart, user accounts, and more.
 
