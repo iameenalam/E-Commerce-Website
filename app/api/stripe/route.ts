@@ -1,7 +1,7 @@
-import prisma from "@/app/lib/db";
-import { redis } from "@/app/lib/redis";
 import { stripe } from "@/app/lib/stripe";
 import { headers } from "next/headers";
+import type Stripe from "stripe";
+import { recordCheckoutSession } from "@/app/lib/orders";
 
 export async function POST(req: Request) {
   const body = await req.text();
@@ -22,17 +22,8 @@ export async function POST(req: Request) {
 
   switch (event.type) {
     case "checkout.session.completed": {
-      const session = event.data.object;
-
-      await prisma.order.create({
-        data: {
-          amount: session.amount_total as number,
-          status: session.status as string,
-          userId: session.metadata?.userId,
-        },
-      });
-
-      await redis.del(`cart-${session.metadata?.userId}`);
+      const session = event.data.object as Stripe.Checkout.Session;
+      await recordCheckoutSession(session);
       break;
     }
     default: {

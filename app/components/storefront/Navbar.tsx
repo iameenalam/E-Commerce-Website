@@ -1,21 +1,23 @@
 import Link from "next/link";
 import { NavbarLinks } from "./NavbarLinks";
-import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
+import { getAuthUser } from "@/app/lib/auth";
 import { ShoppingBagIcon } from "lucide-react";
 import { UserDropdown } from "./UserDropdown";
 import { Button } from "@/components/ui/button";
-import {
-  LoginLink,
-  RegisterLink,
-} from "@kinde-oss/kinde-auth-nextjs/components";
+
 import { Cart } from "@/app/lib/interfaces";
-import { redis } from "@/app/lib/redis";
+import { getCollection } from "@/app/lib/db";
+import { unstable_noStore as noStore } from "next/cache";
 
 export async function Navbar() {
-  const { getUser } = getKindeServerSession();
-  const user = await getUser();
+  noStore();
+  const user = await getAuthUser();
 
-  const cart: Cart | null = await redis.get(`cart-${user?.id}`);
+  let cart: Cart | null = null;
+  if (user) {
+    const cartsCollection = await getCollection<Cart>("carts");
+    cart = await cartsCollection.findOne({ userId: user.id });
+  }
   const total = cart?.items.reduce((sum, item) => sum + item.quantity, 0) || 0;
 
   return (
@@ -26,7 +28,7 @@ export async function Navbar() {
           <img
             src="/logo.png"
             alt="Solezaar Logo"
-            className="h-10 w-auto lg:h-14"
+            className="h-8 w-auto lg:h-10 mt-[-8px]"
           />
         </Link>
       </div>
@@ -48,21 +50,22 @@ export async function Navbar() {
             </Link>
 
             <UserDropdown
-              email={user.email as string}
-              name={user.given_name as string}
-              userImage={
-                user.picture ?? `https://avatar.vercel.sh/${user.given_name}`
-              }
+              email={user.email}
+              name={`${user.firstName} ${user.lastName}`.trim()}
             />
           </>
         ) : (
-          <div className="flex items-center md:space-x-2">
-            <Button variant="ghost" asChild>
-              <LoginLink>Sign in</LoginLink>
+          <div className="flex items-center space-x-1">
+            <Button variant="ghost" size="sm" asChild>
+              <Link href="/login" className="cursor-pointer">
+                Sign in
+              </Link>
             </Button>
-            <span className="hidden md:block h-6 w-px bg-gray-200"></span>
-            <Button variant="ghost" asChild className="hidden md:inline-flex">
-              <RegisterLink>Create Account</RegisterLink>
+            <span className="h-5 w-px bg-gray-200 md:h-6" />
+            <Button variant="ghost" size="sm" asChild>
+              <Link href="/signup" className="cursor-pointer">
+                Create Account
+              </Link>
             </Button>
           </div>
         )}

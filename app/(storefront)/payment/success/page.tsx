@@ -1,9 +1,20 @@
+import { finalizeCheckout } from "@/app/lib/orders";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Check } from "lucide-react";
 import Link from "next/link";
 
-export default function SuccessRoute() {
+export default async function SuccessRoute({
+  searchParams,
+}: {
+  searchParams: { session_id?: string };
+}) {
+  const sessionId = searchParams.session_id;
+
+  if (sessionId) {
+    await finalizeCheckout(sessionId);
+  }
+
   return (
     <section className="w-full min-h-[80vh] flex items-center justify-center">
       <Card className="w-[350px]">

@@ -14,7 +14,7 @@
 ## Tech Stack
 
 - **Frontend:** Next.js & Tailwind CSS
-- **Backend:** Next.js, Kinde-Auth, Upstash & Prisma
+- **Backend:** Next.js, Custom Auth (session + Redis), Upstash & Prisma
 - **Database:** Neon PostgreSQL Platform
 - **Payment Gateway:** Stripe
 - **File Uploads:** UploadThing

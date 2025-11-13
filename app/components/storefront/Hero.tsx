@@ -1,5 +1,5 @@
 
-import prisma from "@/app/lib/db";
+import { getCollection } from "@/app/lib/db";
 import {
   Carousel,
   CarouselContent,
@@ -8,15 +8,17 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import Image from "next/image";
+import type { BannerDoc } from "@/app/lib/interfaces";
 
 async function getData() {
-  const data = await prisma.banner.findMany({
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
-
-  return data;
+  const bannersCollection = await getCollection<BannerDoc>("banners");
+  const data = await bannersCollection
+    .find({}, { sort: { createdAt: -1 } })
+    .toArray();
+  return data.map((banner) => ({
+    id: banner._id,
+    imageString: banner.imageString,
+  }));
 }
 
 export async function Hero() {

@@ -1,4 +1,4 @@
-import prisma from "@/app/lib/db";
+import { getCollection } from "@/app/lib/db";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -27,15 +27,19 @@ import { MoreHorizontal, PlusCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { unstable_noStore as noStore } from "next/cache";
+import type { BannerDoc } from "@/app/lib/interfaces";
 
 async function getData() {
-  const data = await prisma.banner.findMany({
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+  const bannersCollection = await getCollection<BannerDoc>("banners");
+  const banners = await bannersCollection
+    .find({}, { sort: { createdAt: -1 } })
+    .toArray();
 
-  return data;
+  return banners.map((banner) => ({
+    id: banner._id,
+    title: banner.title,
+    imageString: banner.imageString,
+  }));
 }
 
 export default async function BannerRoute() {

@@ -3,25 +3,25 @@
 import { checkOut, delItem } from "@/app/actions";
 import { ChceckoutButton, DeleteItem } from "@/app/components/SubmitButtons";
 import { Cart } from "@/app/lib/interfaces";
-import { redis } from "@/app/lib/redis";
 import { Button } from "@/components/ui/button";
-import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
+import { getAuthUser } from "@/app/lib/auth";
 import { ShoppingBag } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { unstable_noStore as noStore } from "next/cache";
+import { getCollection } from "@/app/lib/db";
 
 export default async function BagRoute() {
   noStore();
-  const { getUser } = getKindeServerSession();
-  const user = await getUser();
+  const user = await getAuthUser();
 
   if (!user) {
     redirect("/");
   }
 
-  const cart: Cart | null = await redis.get(`cart-${user.id}`);
+  const cartsCollection = await getCollection<Cart>("carts");
+  const cart = await cartsCollection.findOne({ userId: user.id });
 
   let totalPrice = 0;
 

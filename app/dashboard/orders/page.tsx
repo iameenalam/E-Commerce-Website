@@ -1,4 +1,4 @@
-import prisma from "@/app/lib/db";
+import { getCollection } from "@/app/lib/db";
 import {
   Card,
   CardContent,
@@ -15,28 +15,37 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { unstable_noStore as noStore } from "next/cache";
+import type { OrderDoc, UserDoc } from "@/app/lib/interfaces";
 
 async function getData() {
-  const data = await prisma.order.findMany({
-    select: {
-      amount: true,
-      createdAt: true,
-      status: true,
-      id: true,
-      User: {
-        select: {
-          firstName: true,
-          email: true,
-          profileImage: true,
-        },
-      },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+  const ordersCollection = await getCollection<OrderDoc>("orders");
+  const orders = await ordersCollection
+    .find({}, { sort: { createdAt: -1 } })
+    .toArray();
 
-  return data;
+  const userIds = orders
+    .map((order) => order.userId)
+    .filter((id): id is string => !!id);
+
+  const usersCollection = await getCollection<UserDoc>("users");
+  const users =
+    userIds.length > 0
+      ? await usersCollection
+          .find(
+            { _id: { $in: Array.from(new Set(userIds)) } },
+            { projection: { _id: 1, firstName: 1, email: 1, profileImage: 1 } }
+          )
+          .toArray()
+      : [];
+  const userMap = new Map(users.map((user) => [user._id, user]));
+
+  return orders.map((order) => ({
+    id: order._id,
+    amount: order.amount,
+    status: order.status,
+    createdAt: order.createdAt,
+    User: order.userId ? userMap.get(order.userId) ?? null : null,
+  }));
 }
 
 export default async function OrdersPage() {
@@ -71,7 +80,9 @@ export default async function OrdersPage() {
                 <TableCell>Order</TableCell>
                 <TableCell>{item.status}</TableCell>
                 <TableCell>
-                  {new Intl.DateTimeFormat("en-US").format(item.createdAt)}
+                  {item.createdAt
+                    ? new Intl.DateTimeFormat("en-US").format(item.createdAt)
+                    : "Unknown"}
                 </TableCell>
                 <TableCell className="text-right">
                   ${new Intl.NumberFormat("en-US").format(item.amount / 100)}

@@ -2,31 +2,39 @@ import { addItem } from "@/app/actions";
 import { ShoppingBagButton } from "@/app/components/SubmitButtons";
 import { FeaturedProducts } from "@/app/components/storefront/FeaturedProducts";
 import { ImageSlider } from "@/app/components/storefront/ImageSlider";
-import prisma from "@/app/lib/db";
+import { getCollection } from "@/app/lib/db";
 
 import { StarIcon } from "lucide-react";
 import { notFound } from "next/navigation";
 import { unstable_noStore as noStore } from "next/cache";
+import type { ProductDoc } from "@/app/lib/interfaces";
 
 async function getData(productId: string) {
-  const data = await prisma.product.findUnique({
-    where: {
-      id: productId,
-    },
-    select: {
-      price: true,
-      images: true,
-      description: true,
-      name: true,
-      id: true,
-    },
-  });
+  const productsCollection = await getCollection<ProductDoc>("products");
+  const product = await productsCollection.findOne(
+    { _id: productId },
+    {
+      projection: {
+        _id: 1,
+        price: 1,
+        images: 1,
+        description: 1,
+        name: 1,
+      },
+    }
+  );
 
-  if (!data) {
+  if (!product) {
     return notFound();
   }
 
-  return data;
+  return {
+    id: product._id,
+    price: product.price,
+    images: product.images,
+    description: product.description,
+    name: product.name,
+  };
 }
 
 export default async function ProductIdRoute({

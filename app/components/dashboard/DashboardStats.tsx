@@ -1,41 +1,46 @@
-import prisma from "@/app/lib/db";
+import { getCollection } from "@/app/lib/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DollarSign, PartyPopper, ShoppingBag, User2 } from "lucide-react";
+import type { OrderDoc, ProductDoc, UserDoc } from "@/app/lib/interfaces";
+import { unstable_noStore as noStore } from "next/cache";
 
 async function getData() {
-  const [user, products, order] = await Promise.all([
-    prisma.user.findMany({
-      select: {
-        id: true,
-      },
-    }),
+  const [usersCollection, productsCollection, ordersCollection] =
+    await Promise.all([
+      getCollection<UserDoc>("users"),
+      getCollection<ProductDoc>("products"),
+      getCollection<OrderDoc>("orders"),
+    ]);
 
-    prisma.product.findMany({
-      select: {
-        id: true,
-      },
-    }),
-
-    prisma.order.findMany({
-      select: {
-        amount: true,
-      },
-    }),
+  const [userCount, productCount, orderStats] = await Promise.all([
+    usersCollection.countDocuments(),
+    productsCollection.countDocuments(),
+    ordersCollection
+      .aggregate([
+        {
+          $group: {
+            _id: null,
+            totalAmount: { $sum: "$amount" },
+            totalOrders: { $sum: 1 },
+          },
+        },
+      ])
+      .toArray(),
   ]);
 
+  const totals = orderStats[0] ?? { totalAmount: 0, totalOrders: 0 };
+
   return {
-    user,
-    products,
-    order,
+    userCount,
+    productCount,
+    totalAmount: totals.totalAmount,
+    orderCount: totals.totalOrders,
   };
 }
 
 export async function DashboardStats() {
-  const { products, user, order } = await getData();
-
-  const totalAmount = order.reduce((accumalator, currentValue) => {
-    return accumalator + currentValue.amount;
-  }, 0);
+  noStore();
+  const { userCount, productCount, orderCount, totalAmount } = await getData();
   return (
     <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
       <Card>
@@ -47,7 +52,7 @@ export async function DashboardStats() {
           <p className="text-2xl font-bold">
             ${new Intl.NumberFormat("en-US").format(totalAmount / 100)}
           </p>
-          <p className="text-xs text-muted-foreground">Based on 100 Charges</p>
+          <p className="text-xs text-muted-foreground">Gross sales to date</p>
         </CardContent>
       </Card>
       <Card>
@@ -56,7 +61,7 @@ export async function DashboardStats() {
           <ShoppingBag className="h-4 w-4 text-blue-500" />
         </CardHeader>
         <CardContent>
-          <p className="text-2xl font-bold">+{order.length}</p>
+          <p className="text-2xl font-bold">+{orderCount}</p>
           <p className="text-xs text-muted-foreground">
             Total Sales on Solezaar
           </p>
@@ -68,7 +73,7 @@ export async function DashboardStats() {
           <PartyPopper className="h-4 w-4 text-indigo-500" />
         </CardHeader>
         <CardContent>
-          <p className="text-2xl font-bold">{products.length}</p>
+          <p className="text-2xl font-bold">{productCount}</p>
           <p className="text-xs text-muted-foreground">
             Total Products created
           </p>
@@ -80,7 +85,7 @@ export async function DashboardStats() {
           <User2 className="h-4 w-4 text-orange-500" />
         </CardHeader>
         <CardContent>
-          <p className="text-2xl font-bold">{user.length}</p>
+          <p className="text-2xl font-bold">{userCount}</p>
           <p className="text-xs text-muted-foreground">Total Users Signed Up</p>
         </CardContent>
       </Card>

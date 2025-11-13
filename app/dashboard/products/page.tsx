@@ -1,4 +1,4 @@
-import prisma from "@/app/lib/db";
+import { getCollection } from "@/app/lib/db";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -23,19 +23,27 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { MoreHorizontal, PlusCircle, UserIcon } from "lucide-react";
+import { MoreHorizontal, PlusCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { unstable_noStore as noStore } from "next/cache";
+import type { ProductDoc } from "@/app/lib/interfaces";
 
 async function getData() {
-  const data = await prisma.product.findMany({
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+  const productsCollection = await getCollection<ProductDoc>("products");
+  const products = await productsCollection
+    .find({}, { sort: { createdAt: -1 } })
+    .toArray();
 
-  return data;
+  return products.map((product) => ({
+    id: product._id,
+    name: product.name,
+    description: product.description,
+    status: product.status,
+    price: product.price,
+    images: product.images,
+    createdAt: product.createdAt ?? new Date(),
+  }));
 }
 
 export default async function ProductsRoute() {
