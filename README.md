@@ -1,6 +1,6 @@
 # E-Commerce Store
 
-**ShoeStore** is an easy-to-use online store where you can browse and buy different types of shoes. It’s designed to give users a smooth and simple shopping experience. The store comes with all the essential features you need for online shopping, like product listings, a shopping cart, user accounts, and more.
+An easy-to-use online store where you can browse and buy different types of shoes. It’s designed to give users a smooth and simple shopping experience. The store comes with all the essential features you need for online shopping, like product listings, a shopping cart, user accounts, and more.
 
 ## Features
 
@@ -13,15 +13,15 @@
 
 ## Tech Stack
 
-- **Frontend:** Next.js & Tailwind CSS
-- **Backend:** Next.js, Custom Auth (session + Redis), Upstash & Prisma
-- **Database:** Neon PostgreSQL Platform
+- **Frontend:** Next.js, TypeScript, & Tailwind CSS
+- **Backend:** Next.js
+- **Database:** MongoDB
 - **Payment Gateway:** Stripe
 - **File Uploads:** UploadThing
 
 ## Demo
 
-You can view the live demo of the website [here](https://e-shoestoree.vercel.app/)
+You can view the live demo of the website [here](https://solezaar.vercel.app/)
 
 ## Contributions
 
