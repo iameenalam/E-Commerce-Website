@@ -267,7 +267,7 @@ export async function checkOut() {
     const baseUrl =
       process.env.NODE_ENV === "development"
         ? "http://localhost:3000"
-        : "https://solezaar.vercel.app";
+        : process.env.NEXT_PUBLIC_BASE_URL;
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",

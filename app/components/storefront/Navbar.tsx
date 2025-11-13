@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { NavbarLinks } from "./NavbarLinks";
 import { getAuthUser } from "@/app/lib/auth";
 import { ShoppingBagIcon } from "lucide-react";
@@ -25,10 +26,13 @@ export async function Navbar() {
       {/* Left - Logo */}
       <div className="flex items-center z-10">
         <Link href="/">
-          <img
+          <Image
             src="/logo.png"
             alt="Solezaar Logo"
+            width={120}
+            height={40}
             className="h-8 w-auto lg:h-10 mt-[-8px]"
+            priority
           />
         </Link>
       </div>

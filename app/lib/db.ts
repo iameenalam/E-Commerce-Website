@@ -1,4 +1,4 @@
-import { MongoClient, type Db, type Collection } from "mongodb";
+import { MongoClient, type Db, type Collection, type Document } from "mongodb";
 
 const uri = process.env.MONGODB_URI;
 if (!uri) {
@@ -46,7 +46,7 @@ export async function getDb(): Promise<Db> {
   return dbPromise;
 }
 
-export async function getCollection<TSchema = unknown>(
+export async function getCollection<TSchema extends Document = Document>(
   name: keyof Collections
 ): Promise<Collection<TSchema>> {
   if (!globalWithMongo._collections) {
@@ -56,5 +56,5 @@ export async function getCollection<TSchema = unknown>(
     const db = await getDb();
     globalWithMongo._collections[name] = db.collection(name);
   }
-  return globalWithMongo._collections[name] as Collection<TSchema>;
+  return globalWithMongo._collections[name] as unknown as Collection<TSchema>;
 }
